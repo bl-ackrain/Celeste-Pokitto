@@ -58,7 +58,7 @@ bool pbtn (uint8_t i, uint8_t p=0);
 	Audio
 --------------------------------------------------------------------------------------------*/
 void sfx (uint8_t n, uint8_t channel=0 , int16_t offset=0 , uint16_t length=0);
-void music (uint8_t n, uint8_t fade_len ,uint8_t channel_mask);
+void music (int8_t n=-1, uint8_t fade_len=0 ,uint8_t channel_mask=0);
 
 /*--------------------------------------------------------------------------------------------------------
 	Map

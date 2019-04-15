@@ -310,7 +310,8 @@ bool pbtn (uint8_t i, uint8_t p)
 --------------------------------------------------------------------------------------------*/
 void sfx (uint8_t n, uint8_t channel , int16_t offset , uint16_t length)
 {
-    //TODO
+
+#ifdef POKITTO
     switch(n)
     {
     case 0:
@@ -377,10 +378,106 @@ void sfx (uint8_t n, uint8_t channel , int16_t offset , uint16_t length)
         Pokitto::Sound::playSFX(_sfx55,sizeof(_sfx55));
         break;
     }
+#endif
+#ifdef PICOBOY
+    switch(n)
+    {
+    case 0:
+        pb.sound.playSFX(_sfx0,sizeof(_sfx0));
+        break;
+    case 1:
+        pb.sound.playSFX(_sfx1,sizeof(_sfx1));
+        break;
+    case 2:
+        pb.sound.playSFX(_sfx2,sizeof(_sfx2));
+        break;
+    case 3:
+        pb.sound.playSFX(_sfx3,sizeof(_sfx3));
+        break;
+    case 4:
+        pb.sound.playSFX(_sfx4,sizeof(_sfx4));
+        break;
+    case 5:
+        pb.sound.playSFX(_sfx5,sizeof(_sfx5));
+        break;
+    case 6:
+        pb.sound.playSFX(_sfx6,sizeof(_sfx6));
+        break;
+    case 7:
+        pb.sound.playSFX(_sfx7,sizeof(_sfx7));
+        break;
+    case 8:
+        pb.sound.playSFX(_sfx8,sizeof(_sfx8));
+        break;
+    case 9:
+        pb.sound.playSFX(_sfx9,sizeof(_sfx9));
+        break;
+    case 13:
+        pb.sound.playSFX(_sfx13,sizeof(_sfx13));
+        break;
+    case 14:
+        pb.sound.playSFX(_sfx14,sizeof(_sfx14));
+        break;
+    case 15:
+        pb.sound.playSFX(_sfx15,sizeof(_sfx15));
+        break;
+    case 16:
+        pb.sound.playSFX(_sfx16,sizeof(_sfx16));
+        break;
+    case 23:
+        pb.sound.playSFX(_sfx23,sizeof(_sfx23));
+        break;
+    case 35:
+        pb.sound.playSFX(_sfx35,sizeof(_sfx35));
+        break;
+    case 37:
+        pb.sound.playSFX(_sfx37,sizeof(_sfx37));
+        break;
+    case 38:
+        pb.sound.playSFX(_sfx38,sizeof(_sfx38));
+        break;
+    case 51:
+        pb.sound.playSFX(_sfx51,sizeof(_sfx51));
+        break;
+    case 54:
+        pb.sound.playSFX(_sfx54,sizeof(_sfx54));
+        break;
+    case 55:
+        pb.sound.playSFX(_sfx55,sizeof(_sfx55));
+        break;
+    }
+#endif
 };
-void music (uint8_t n, uint8_t fade_len ,uint8_t channel_mask)
+void music (int8_t n, uint8_t fade_len ,uint8_t channel_mask)
 {
-    //TODO
+#ifdef POKITTO
+    switch(n)
+    {
+    case -1:
+        Pokitto::Sound::pauseMusicStream();
+        break;
+    case 0:
+        Pokitto::Sound::pauseMusicStream();
+        Pokitto::Sound::playMusicStream("Celeste/music/music0.raw",0);
+        break;
+    case 10:
+        Pokitto::Sound::pauseMusicStream();
+        Pokitto::Sound::playMusicStream("Celeste/music/music10.raw",0);
+        break;
+    case 20:
+        Pokitto::Sound::pauseMusicStream();
+        Pokitto::Sound::playMusicStream("Celeste/music/music20.raw",0);
+        break;
+    case 30:
+        Pokitto::Sound::pauseMusicStream();
+        Pokitto::Sound::playMusicStream("Celeste/music/music30.raw",0);
+        break;
+    case 40:
+        Pokitto::Sound::pauseMusicStream();
+        Pokitto::Sound::playMusicStream("Celeste/music/music40.raw",0);
+        break;
+    }
+#endif
 };
 
 /*--------------------------------------------------------------------------------------------------------

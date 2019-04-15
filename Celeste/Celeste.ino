@@ -1,13 +1,17 @@
 #include "game.h"
-
+#include "ESP8266WiFi.h"
 Game game;
 void setup()
 {
+  WiFi.forceSleepBegin();
+  delay(5);  
   pb.begin();
   //Serial.begin(115200);
-  pb.setFrameRate(60);
+  pb.setFrameRate(100);
   pb.display.setFont(pico8);
   game.init();
+  pb.sound.globalVolume=7;
+  pb.sound.playMusicStream("celeste.raw");
 }
 
 void loop()

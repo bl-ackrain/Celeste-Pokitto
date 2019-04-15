@@ -25,6 +25,7 @@ void BigChest::draw()
     Object * hit = collide(player, 0, 8);
     if (hit && hit->is_solid(0, 1))
     {
+      music(-1);
       sfx(37);
       pause_player = true;
       hit->spd.x = 0;

@@ -2,6 +2,7 @@
 
 
 #include "Pokitto.h"
+#include "PokittoCookie.h"
 
 #ifndef POK_SIM
     #include <cmath>

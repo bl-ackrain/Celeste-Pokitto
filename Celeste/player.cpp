@@ -1,4 +1,8 @@
 #include "player.h"
+extern "C" {
+    #include "Tiles.h"
+}
+
 
 Player::Player()
   : Object(player)
@@ -291,7 +295,46 @@ void Player::draw()
   }
 
   hair.draw_hair(this, flip.x ? -1 : 1, djump);
-  _spr(spr, x, y, flip.x, flip.y);
+  int color = djump == 1 ? 8 : (djump == 2 ? 7 + ((frames / 3) % 2) * 4 : 12);
+
+  if(color==8)
+    _spr(spr, x, y, flip.x, flip.y);
+  else
+  {
+      uint8_t _flip=0;
+      if(flip.x)
+          _flip |= 1;
+      if(flip.y)
+          _flip |= 2;
+      if(_flip)
+       {
+        #ifdef POKITTO
+           if(color==7)
+             pb.display.drawBitmap(x-_cameraX,y-_cameraY,player_white[spr-1],0,_flip);
+           if(color==11)
+             pb.display.drawBitmap(x-_cameraX,y-_cameraY,player_green[spr-1],0,_flip);
+           if(color==12)
+             pb.display.drawBitmap(x-_cameraX,y-_cameraY,player_blue[spr-1],0,_flip);
+        #elif defined PICOBOY
+           if(color==7)
+             pb.display.drawBitmapRot(x-_cameraX,y-_cameraY,player_white[spr-1],0,_flip);
+           if(color==11)
+             pb.display.drawBitmapRot(x-_cameraX,y-_cameraY,player_green[spr-1],0,_flip);
+           if(color==12)
+             pb.display.drawBitmapRot(x-_cameraX,y-_cameraY,player_blue[spr-1],0,_flip);
+        #endif
+       }
+       else
+       {
+           if(color==7)
+             pb.display.drawBitmap(x-_cameraX,y-_cameraY,player_white[spr-1]);
+           if(color==11)
+             pb.display.drawBitmap(x-_cameraX,y-_cameraY,player_green[spr-1]);
+           if(color==12)
+             pb.display.drawBitmap(x-_cameraX,y-_cameraY,player_blue[spr-1]);
+       }
+
+  }
 }
 
 

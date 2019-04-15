@@ -15,12 +15,18 @@
 #include "message.h"
 #include "flag.h"
 
-#include "Tiles.h"
+extern "C"
+{
+    #include "Tiles.h"
+};
+
 
 // STATIC //
 
-int seconds = 0;
-int minutes = 0;
+uint32_t seconds = 0;
+uint32_t minutes = 0;
+uint32_t start_time=0;
+uint32_t total_time=0;
 
 // PARTICLES //
 
@@ -98,10 +104,60 @@ bool start_game=false;
 
 Game * game_instance = 0;
 
+bool menu=false;
+int menu_selected=0;
+
+/* Save Cookie */
+
+class CelesteSave : public Pokitto::Cookie {
+public:
+  uint32_t total_time;
+  uint32_t current_room;
+  uint32_t deaths;
+  uint32_t fruits;
+
+  CelesteSave() {
+    total_time=0;
+    current_room=0;
+    deaths=0;
+    fruits=0;
+  }
+};
+
+CelesteSave celesteSave;
+
+void SaveGame()
+{
+    celesteSave.current_room=room;
+    celesteSave.deaths=deaths;
+    for(int i=0;i<32;i++)
+        celesteSave.fruits |= got_fruit[i] << i;
+    celesteSave.total_time=total_time;
+    celesteSave.saveCookie();
+}
+
+void LoadSave()
+{
+    room=celesteSave.current_room;
+    deaths=celesteSave.deaths;
+    for(int i=0;i<32;i++)
+        got_fruit[i]=(celesteSave.fruits >> i)&0x1;
+};
+
+void ResetSave()
+{
+    celesteSave.current_room=0;
+    celesteSave.deaths=0;
+    celesteSave.fruits=0;
+    celesteSave.total_time=0;
+    celesteSave.saveCookie();
+};
+
 Game::Game()
 {
   game_instance = this;
   state = MAINMENU;
+  celesteSave.begin("Celeste",celesteSave);
 }
 
 void Game::init()
@@ -129,35 +185,64 @@ void Game::init()
     got_fruit[i] = false;
   }
 
+  LoadSave();
 
+  music(40);
   load_room(31);
 
   max_djump = 1;
+
 }
 
 void Game::update()
 {
+  if(menu)
+  {
+      if(pb.buttons.released(BTN_B))
+        menu=false;
+      if(pb.buttons.repeat(BTN_UP,10))
+        menu_selected--;
+      if(pb.buttons.repeat(BTN_DOWN,10))
+        menu_selected++;
+      if(menu_selected < 0)
+        menu_selected=0;
+      if(menu_selected > 2)
+        menu_selected=2;
+
+      if(pb.buttons.released(BTN_A))
+        {
+            if(menu_selected==0)
+                restart_room();
+            if(menu_selected==1)
+                SaveGame();
+            menu=false;
+        }
+      return;
+  }
+  total_time=celesteSave.total_time+pb.getTime()-start_time;
+
   if (goto_room != -1)
   {
     load_room(goto_room);
     goto_room = -1;
   }
 
-  if (pb.buttons.pressed(BTN_C))
-  {
-    load_room(room);
-  }
+
 
   frames = (frames + 1) % 30;
   if (state == PLAYING)
   {
-    if (frames == 0 && level_index() < 30)
+    if (pb.buttons.pressed(BTN_C))
     {
-      seconds = (seconds + 1) % 60;
-      if (seconds == 0)
-      {
-        minutes++;
-      }
+        menu=true;
+        menu_selected=0;
+    }
+
+    if (level_index() < 30)
+    {
+      seconds = (total_time/1000) % 60;
+      minutes = (total_time/60/1000) % 60;
+
     }
 
     if(sfx_timer > 0)
@@ -196,22 +281,32 @@ void Game::update()
   }
   else if (state == MAINMENU)
   {
-    if (pb.buttons.held(BTN_A,2) || pb.buttons.held(BTN_B,2))
+    if ((pb.buttons.held(BTN_A,1)) && !start_game)
     {
       start_game_flash=50;
       start_game=true;
       sfx(38);
+    }
+    if ((pb.buttons.held(BTN_C,1)) && !start_game)
+    {
+      start_game_flash=50;
+      start_game=true;
+      sfx(38);
+      ResetSave();
     }
     if(start_game)
     {
         start_game_flash--;
         if(start_game_flash < -30)
         {
+
             frames = 0;
             start_game=false;
             pal();
-            load_room(0);
+            music(0);
+            load_room(celesteSave.current_room);
             state = PLAYING;
+            start_time=pb.getTime();
         }
     }
   }
@@ -287,6 +382,22 @@ void Game::draw()
       objects[i]->draw();
   }
 
+  if(menu)
+  {
+      pb.display.setColor(BLACK);
+      pb.display.fillRect(18,20,75,30);
+      pb.display.setColor(WHITE);
+      pb.display.drawRect(18,20,75,30);
+      pb.display.fillRect(22,26+menu_selected*7,3,3);
+      pb.display.setCursor(30+(menu_selected==0),25);
+      pb.display.print("reset level");
+      pb.display.setCursor(30+(menu_selected==1),32);
+      pb.display.print("save");
+      pb.display.setCursor(30+(menu_selected==2),39);
+      pb.display.print("back");
+      return;
+  }
+
   for(int i=0; i<PARTICLES_COUNT;i++)
     {
        particles[i].x+=particles[i].spd;
@@ -320,11 +431,23 @@ void Game::draw()
 #ifdef POKITTO
       updateCamera(10+pb.display.width/2,25+pb.display.height/2);
 #endif // POKITTO
-    map(roomx * 16,roomy * 16,0,0,16,16);
-    print("A or B", 58, 75, 6);
-    print("matt thorson", 46, 91, 5);
-    print("noel berry", 50, 97, 5);
-    print("@bl_ackrain 2019", 38, 105, 5);
+
+    pb.display.drawBitmap(44-_cameraX,32-_cameraY, celeste_logo);
+
+    if(!start_game)
+        if(celesteSave.total_time==0)
+        {
+            print("A: New game", 48, 80, 6);
+        }
+        else
+        {
+            print("A: Continue", 48, 80, 6);
+            print("C: New game ", 48, 87, 6);
+        }
+
+
+    print("noel berry & matt thorson", 22, 102, 5);
+    print("@bl_ackrain 2019", 38, 109, 5);
   }
 
   deleteDeadObjects();
@@ -551,6 +674,16 @@ bool is_title()
 void next_room()
 {
   goto_room = room + 1;
+  uint8_t roomx=(room+1)%8;
+  uint8_t roomy=(room+1)>>3;
+  if(roomx==2 && roomy==1)
+    music(30);
+  else if(roomx==3 && roomy==1)
+    music(20);
+  else if(roomx==4 && roomy==2)
+    music(30);
+  else if(roomx==5 && roomy==3)
+    music(30);
 }
 
 void restart_room()

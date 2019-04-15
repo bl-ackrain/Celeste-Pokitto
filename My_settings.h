@@ -14,6 +14,7 @@
 
 #define PROJ_ENABLE_SOUND 1
 #define PROJ_STREAMING_MUSIC 1
+#define PROJ_SDFS_STREAMING
 #define PROJ_AUD_FREQ 11025
 
 #define PROJ_BUTTONS_POLLING_ONLY //use only polling (no interrupts) for buttons

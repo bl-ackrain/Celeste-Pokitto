@@ -8,7 +8,7 @@ Pokitto::Core pb;
 int main () {
     pb.begin();
     Pokitto::Sound::ampEnable(true);
-    pb.setFrameRate(60);
+    pb.setFrameRate(100);
 
     pb.display.loadRGBPalette(palettePico);
     pb.display.setInvisibleColor(BLACK);

@@ -37,7 +37,7 @@ void Message::draw()
     }
     Point off;
     off.x = 20;
-    off.y = 96;
+    off.y = 53;//96
 
     for (int i = 0; i < 3; i++)
     {
@@ -47,7 +47,7 @@ void Message::draw()
         memcpy(tmp_text, text[i], tmp_index);
         tmp_text[tmp_index] = '\0';
         rectfill(off.x - 2, off.y - 2, off.x + 2 + (4 * tmp_index), off.y + 8, 7);
-        print(tmp_text, off.x, off.y, 0);
+        print(tmp_text, off.x, off.y, 5);
 
         off.y += 7;
       }
